@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="../ol.js"></script>
+    <link rel="stylesheet" href="../ol.css">
+    <title>map test</title>
+    <style>
+        #popup {
+            padding: 10px;
+            background: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="popup">
+        <div id="popup-content"></div>
+    </div>
+    <div id="container" style="height: 95vh;"></div>
+    <script>
+        var popup = document.getElementById('popup');
+        var popupContent = document.getElementById('popup-content');
+        var overlay = new ol.Overlay({
+            element: popup
+        })
+        console.log('overlay',overlay);
+        var map = new ol.Map({
+            target: "container",
+            // controls:ol.control.defaults({attribution:false,zoom:false,rotate:false}),
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM({ crossOrigin: null })
+                })
+            ],
+            overlays: [overlay],
+            view: new ol.View({
+                projection: "EPSG:4326",
+                center: [51.899414, 34.976002],
+                zoom: 5
+            })
+        });
+        var zoomSlider = new ol.control.ZoomSlider();
+        map.addControl(zoomSlider);
+
+        map.on('singleclick', function (evt) {
+            // console.log('cooord=====>', coordinate);
+            var coordinate = evt.coordinate;
+            popupContent.innerHTML = '<p>' +  coordinate + '</p>';
+            overlay.setPosition(coordinate);
+        })
+    </script>
+
+</body>
+
+</html>
