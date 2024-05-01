@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="../ol.js"></script>
+    <link rel="stylesheet" href="../ol.css">
+    <title>map test</title>
+    <style>
+
+    </style>
+</head>
+
+<body>
+
+    <div id="container" style="height: 95vh;"></div>
+    <select id="type">
+        <option value="point">point</option>
+        <option value="LineString">LineString</option>
+        <option value="Polygon">Polygon</option>
+        <option value="Circle">Circle</option>
+    </select>
+
+    <script>
+        const osmLayer = new ol.layer.Tile({
+            source: new ol.source.OSM({ crossOrigin: null })
+        })
+        const vectorSource = new ol.source.Vector();
+
+        const vectorLayer = new ol.layer.Vector({
+            source: vectorSource,
+            style: new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 0, 27, 0.4)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: "#00aaff6b",
+                    width: 2
+                }),
+                image: new ol.style.Circle({
+                    radius: 7,
+                    fill: new ol.style.Fill({
+                        color: 'green'
+                    })
+                })
+            })
+        })
+        const map = new ol.Map({
+            target: "container",
+            controls: [],
+            layers: [osmLayer, vectorLayer],
+            view: new ol.View({
+                projection: "EPSG:4326",
+                center: [51.899414, 34.976002],
+                zoom: 5
+            })
+        });
+
+        //ترسیم خطی
+        // const drawLine = new ol.interaction.Draw({
+        //     source: vectorSource,
+        //     type: 'LineString', // تعیین نوع شکل به خط
+        //     style: new ol.style.Style({
+        //         fill: new ol.style.Fill({
+        //             color: 'rgba(255, 255, 255, 0.2)'
+        //         }),
+        //         stroke: new ol.style.Stroke({
+        //             color: 'red', // رنگ خط
+        //             width: 3 // ضخامت خط
+        //         })
+        //     })
+        // });
+        // map.addInteraction(drawLine);
+
+        //ترسیم ناحیه
+        // const draw = new ol.interaction.Draw({
+        //     source: vectorSource,
+        //     type: 'Polygon'
+        // })
+        // map.addInteraction(draw)
+        var draw;
+        var type = document.getElementById('type');
+        const modify = new ol.interaction.Modify({
+            source:vectorSource
+        })
+        map.addInteraction(modify)
+        function addInteraction() {
+            draw = new ol.interaction.Draw({
+                source: vectorSource,
+                type:type.value,
+                style: new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 255, 255, 0.2)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: 'rgba(255, 0, 255, 0.2)', // رنگ خط
+                    width: 3 // ضخامت خط
+                })
+            })
+        })
+        map.addInteraction(draw)
+        }
+        type.onchange = function(){
+            map.removeInteraction(draw);
+            addInteraction();
+        }
+        addInteraction();
+    </script>
+
+</body>
+
+</html>
