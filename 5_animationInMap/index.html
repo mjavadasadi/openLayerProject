@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="../ol.js"></script>
+    <link rel="stylesheet" href="../ol.css">
+    <title>map test</title>
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <div id="container" style="height: 95vh;"></div>
+    <input type="button" value="شرکت فرداپ" onclick="zoom()" />
+    <input type="button" value="ایران" onclick="zoomBack()" />
+    <input type="button" value="چپ" onclick="left()" />
+    <input type="button" value="راست" onclick="right()" />
+
+    <script>
+
+        const osmLayer = new ol.layer.Tile({
+            source: new ol.source.OSM({ crossOrigin: null })
+        })
+        const view = new ol.View({
+            projection: "EPSG:4326",
+            center: [51.899414, 34.976002],
+            zoom: 5
+        })
+        const map = new ol.Map({
+            target: "container",
+            controls: [],
+            layers: [osmLayer],
+            view: view
+        });
+
+
+        function zoom() {
+            // map.getView().setCenter([57.026807, 30.287889])
+            // map.getView().setZoom(15)
+            view.animate({
+                center:[57.026807, 30.287889],
+                zoom:15,
+                duration:5000 // زمان مورد نیاز انجام انیمیشن
+            })
+        }
+        function zoomBack() {
+            view.animate({
+                center:[51.899414, 34.976002],
+                zoom:5,
+                duration:2000 // زمان مورد نیاز انجام انیمیشن
+            })
+        }
+        function left() {
+            console.log('Math.PI',Math.PI);
+            view.animate({
+
+               rotation:map.getView().getRotation()-Math.PI/2,
+                duration:2000 // زمان مورد نیاز انجام انیمیشن
+            })
+        }
+        function right() {
+            view.animate({
+                rotation:map.getView().getRotation()+Math.PI/2,
+                duration:2000 // زمان مورد نیاز انجام انیمیشن
+            })
+        }
+
+    </script>
+
+</body>
+
+</html>
