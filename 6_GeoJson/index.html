@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="../ol.js"></script>
+    <link rel="stylesheet" href="../ol.css">
+    <title>map test</title>
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <div id="container" style="height: 95vh;"></div>
+
+
+    <script>
+        const geojson = {
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        name:'رهیار ۱'
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              57.02644929190325,
+              30.281128158379616
+            ],
+            [
+              57.02890307384595,
+              30.275958965836722
+            ],
+            [
+              57.03663620481558,
+              30.27974759323199
+            ],
+            [
+              57.03395935178776,
+              30.282893969209937
+            ],
+            [
+              57.02644929190325,
+              30.281128158379616
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        name:'رهیار ۲'
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              57.02559418607498,
+              30.28061446198899
+            ],
+            [
+              57.0165969856202,
+              30.277789083772277
+            ],
+            [
+              57.01998023041983,
+              30.271720666961897
+            ],
+            [
+              57.02812232504539,
+              30.275669996727416
+            ],
+            [
+              57.02559418607498,
+              30.28061446198899
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        name:'رهیار ۳'
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              57.02615186378938,
+              30.273968272490933
+            ],
+            [
+              57.03295553190205,
+              30.266133538835604
+            ],
+            [
+              57.03964766447163,
+              30.270725282356707
+            ],
+            [
+              57.0336991021872,
+              30.27753222717375
+            ],
+            [
+              57.02615186378938,
+              30.273968272490933
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    }
+  ]
+}
+        const osmLayer = new ol.layer.Tile({
+            source: new ol.source.OSM({ crossOrigin: null })
+        })
+        const view = new ol.View({
+            projection: "EPSG:4326",
+            center: [57.026807, 30.287889],
+            zoom: 14
+        })
+        const map = new ol.Map({
+            target: "container",
+            controls: [],
+            layers: [osmLayer],
+            view: view
+        });
+        const style = new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: 'rgba(255,255,255,.5)'
+            }),
+            stroke: new ol.style.Stroke({
+                color: 'red',
+                width: 1
+            }),
+            text: new ol.style.Text({
+                font:'12px "iransans"',
+                fill: new ol.style.Fill({
+                    color:'black'
+                })
+
+            })
+
+        })
+        var vectorSource = new ol.source.Vector({
+            features: new ol.format.GeoJSON().readFeatures(geojson)
+        });
+        const layer = new ol.layer.Vector({
+            source: vectorSource,
+            style: function (feature) {
+                style.getText().setText(feature.get('name'));
+                return style;
+            }
+        })
+        map.addLayer(layer);
+        map.getView().fit(vectorSource.getExtent(), map.getSize())// رفتن به فیچرمون در زمان لود شدن
+    </script>
+
+</body>
+
+</html>
