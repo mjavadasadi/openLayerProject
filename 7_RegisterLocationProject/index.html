@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../ol.js"></script>
+  <link rel="stylesheet" href="../ol.css">
+  <title>map test</title>
+  <style>
+
+  </style>
+</head>
+
+<body>
+  <div id="container" style="height: 90vh;"></div>
+  <input type="text" placeholder="عنوان" id="title" />
+  <input type="text" placeholder="توضیحات" id="discription" />
+  <input type="button" value="ثبت" onclick="saveData()" />
+  <input type="button" value="نمایش" onclick="show()" /><br>
+  <div id="result"></div>
+
+  <script>
+    let points = [];
+    let title = document.getElementById('title');
+    let discription = document.getElementById('discription');
+    const osmLayer = new ol.layer.Tile({
+      source: new ol.source.OSM({ crossOrigin: null })
+    })
+    const view = new ol.View({
+      projection: "EPSG:4326",
+      center: [51.899414, 34.976002],
+      zoom: 5
+    })
+    const map = new ol.Map({
+      target: "container",
+      controls: [],
+      layers: [osmLayer],
+      view: view
+    });
+    const source = new ol.source.Vector({})
+    const layer = new ol.layer.Vector({
+      source: source,
+      style: new ol.style.Style({
+        image: new ol.style.Circle({
+          radius: 7,
+          fill: new ol.style.Fill({
+            color: 'red'
+          })
+        })
+      })
+    });
+    map.addLayer(layer)
+    var draw = new ol.interaction.Draw({
+      source: source,
+      type: 'Point'
+    });
+    draw.on('drawend', function (res) {
+      layer.getSource().clear();
+      console.log('reaa', res);
+    })
+    map.addInteraction(draw)
+
+    function saveData() {
+      if (!title.value || !discription.value) {
+        alert('مقدار عنوان و توضیحات را وارد کنید');
+        return;
+      }
+      let feature = layer.getSource().getFeatures()[0];//گرفتن نقطه ی ثبت شده
+      feature.set('title', title.value);
+      feature.set('discription', discription.value);
+      //اگر چند لایه متفاوت بروی هم داشتید میتوانید با دادن تایپ آن ها رو از هم تفکیک کنید
+      points.push(feature);
+      layer.getSource().clear();
+      title.value = '';
+      discription.value = '';
+      // console.log('pointsssss', points);
+    }
+    function show() {
+      map.removeInteraction(draw);//خارج کردن حالت ترسیم
+      layer.getSource().addFeatures(points)//کشیدن نقاط ثبت شده
+
+      map.getView().fit(source.getExtent(), map.getSize())// زمان نمایش همه نقاط رو نمایش میده
+    }
+
+    map.on('click', function (e) { // باعث میشود شکلی که روی نقشه هست و روی آن کلیک کردیم اطلاعاتش به ما برگشت داده شود
+      map.forEachFeatureAtPixel(e.pixel, function (feature, layer) {
+        // console.log('feeee',feature);
+        // console.log('laaaaa',layer);
+        if (feature && layer) {
+          let titleValue = feature.get('title')
+          let discriptionValue = feature.get('discription')
+          // console.log('title,dis', titleValue, discriptionValue);
+          let result = document.getElementById('result')
+          result.innerHTML = "<p> عنوان مکان:" + titleValue + "</P><p> توضیحات مکان:" + discriptionValue + "</P>"
+        }
+
+      })
+    })
+
+  </script>
+
+</body>
+
+</html>
