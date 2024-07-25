@@ -1,0 +1,109 @@
+<!-- 
+برای استفاده از قابلیت مسیریابی ما اگر بخواهیم انلاین استفاده کنیم میتوانیم از مپ باکس یا گوگل استفاده کنیم
+ولی اگر بخواهیم خودمان یک سرویس داشته باشیم و یا افلاین استفاده کنیم میتونیم از گراف هوپر استفاده کنیم
+برای اجرا کردن این موتور باید حاوا بروی سیستم نصب داشته باشید
+ بعد در پوشه فایل  ها سی ام دی رو باز کنید و کدی که در فایل تکس هست رو اجرا کنید
+ حالا در اینجا اون سرویس رو روی لوکال ران داریم با مرکزیت ایران و حالا به وسیله 
+ api
+ ازش سرویس میگیریم
+http://localhost:8989/route?type=json&point=30.296,57.079&point=30.314,57.076
+
+ -->
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../ol.js"></script>
+  <link rel="stylesheet" href="../ol.css">
+  <title>map test</title>
+  <style>
+
+  </style>
+</head>
+
+<body>
+  <div id="container" style="height: 90vh;"></div>
+  <input type="button" value="مسیریابی" onclick="routing()" />
+  <p id="time"></p>
+  <p id="distance"></p>
+  <script>
+
+    const osmLayer = new ol.layer.Tile({
+      source: new ol.source.OSM({ crossOrigin: null })
+    })
+    const view = new ol.View({
+      projection: "EPSG:4326",
+      center: [51.899414, 34.976002],
+      zoom: 5
+    })
+    const map = new ol.Map({
+      target: "container",
+      controls: [],
+      layers: [osmLayer],
+      view: view
+    });
+    const source = new ol.source.Vector({});
+    const layer = new ol.layer.Vector({
+      source: source,
+      style: new ol.style.Style({
+        stroke: new ol.style.Stroke({
+          color: 'rgba(0, 0, 255, 0.5)',
+          width: 5
+        }),
+        image: new ol.style.Circle({
+          radius: 5,
+          fill: new ol.style.Fill({
+            color: 'green'
+          })
+        })
+      })
+    })
+
+    map.addLayer(layer)
+
+    // routing()
+    function routing() {
+      const url = `http://localhost:8989/route?type=json&point=${points[0]}&point=${points[1]}`
+      var http = new XMLHttpRequest();
+      http.open('get', url, false);
+      http.send();
+      const result = JSON.parse(http.responseText);
+      console.log('resultresult', result);
+      const format = new ol.format.Polyline({});
+      const road = format.readGeometry(result.paths[0].points, {
+        dataProjection: 'EPSG:4326',
+        featureProjection: 'EPSG:4326',
+      })
+      var feature = new ol.Feature({ geometry: road })
+      source.addFeature(feature);
+      map.getView().fit(source.getExtent(), map.getSize());//فیت کردن نقشه بروی دو نقطه
+      let time = document.getElementById('time');
+      let distance = document.getElementById('distance');
+      time.innerHTML = Math.round(result.paths[0].time / 60000)
+      distance.innerHTML = Math.round(result.paths[0].distance)
+    }
+
+    let draw = new ol.interaction.Draw({
+      source: source,
+      type: "Point"
+    })
+    let points = []
+    draw.on('drawend', function (res) {
+
+      if (points.length >= 2) {
+        layer.getSource().clear();
+        points = [];
+      }
+      points.push(`${res.feature.getGeometry().getCoordinates()[1]},${res.feature.getGeometry().getCoordinates()[0]}`)//این پارامتر چون برعکس گوگل به ما مقادیر رو میده برای همین جا به جا نوشته شدن
+      console.log('poooint', points);
+    })
+    map.addInteraction(draw)
+  </script>
+
+</body>
+
+</html>
